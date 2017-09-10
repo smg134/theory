@@ -138,11 +138,11 @@ struct logic_expr : bool_expr {
 };
 
 //N-Height
-int nheight(const num_expr& ne) {
+int nheight(const num_expr* ne) {
 
 }
 
 //B-Height
-int bheight(const bool_expr& be) {
+int bheight(const bool_expr* be) {
 
 }
