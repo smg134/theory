@@ -139,10 +139,32 @@ struct logic_expr : bool_expr {
 
 //N-Height
 int nheight(const num_expr* ne) {
-
+	switch (ne->type) {
+	case num_expr_type::integer:
+		return 0;
+	case num_expr_type::argument:
+		return 1;
+	case num_expr_type::arithmetic:
+		return 1 + max(nheight(ne->first), nheight(ne->second));
+	case num_expr_type::conditional:
+		return 1 + max(bheight(ne->test), max(nheight(ne->first), nheight(ne->second)));
+	}
 }
+
 
 //B-Height
 int bheight(const bool_expr* be) {
+	switch (be->type) {
+	case bool_expr_type::boolean:
+		return 0;
+	case bool_expr_type::relational:
+		return 1 + max(nheight(be->first), nheight(be->second));
+	case bool_expr_type::logic:
+		return 1 + max(bheight(be->first), bheight(be->second));
+	}
+}
 
+int max(int a, int b) {
+	if (a > b) return a;
+	else return b;
 }
