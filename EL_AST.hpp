@@ -38,15 +38,32 @@ struct Program {
 	num_expr body;
 };
 
+//Numeric expression type
+enum num_expr_type {
+	integer,
+	argument,
+	arithmetic,
+	conditional,
+};
+
 //Numeric expression
 struct num_expr {
+	num_expr_type type;
+};
 
+//Boolean expression type
+enum bool_expr_type {
+	boolean,
+	relational,
+	logic,
 };
 
 //Boolean expression
 struct bool_expr {
-
+	bool_expr_type type;
 };
+
+
 
 //N-Height
 int nheight(const num_expr& ne) {
