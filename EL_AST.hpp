@@ -35,7 +35,10 @@ enum logic_op {
 //Program
 struct Program {
 	int args;
-	num_expr body;
+	num_expr* body;
+
+	Program(int a, num_expr* b)
+		: args(a), body(b) {}
 };
 
 //Numeric expression type
@@ -49,30 +52,45 @@ enum num_expr_type {
 //Numeric expression
 struct num_expr {
 	num_expr_type type;
+
+	num_expr(num_expr_type t)
+		: type(t) {}
 };
 
 //Integer numeric expression
 struct int_expr : num_expr {
 	int val;
+
+	int_expr(int v)
+		: num_expr(integer), val(v) {}
 };
 
 //Argument numeric expression
 struct arg_expr : num_expr {
 	int args;
+
+	arg_expr(int a)
+		: num_expr(argument), args(a) {}
 };
 
 //Arithmetic numeric expression
 struct arith_expr : num_expr {
 	arith_op op;
-	num_expr first;
-	num_expr second;
+	num_expr* first;
+	num_expr* second;
+
+	arith_expr(arith_op o, num_expr* f, num_expr* s)
+		: num_expr(arithmetic), op(o), first(f), second(s) {}
 };
 
 //Conditional numeric expression
 struct cond_expr : num_expr {
-	bool_expr test;
-	num_expr pass;
-	num_expr fail;
+	bool_expr* test;
+	num_expr* pass;
+	num_expr* fail;
+
+	cond_expr(bool_expr* t, num_expr* p, num_expr* f)
+		: num_expr(conditional), test(t), pass(p), fail(f) {}
 };
 
 //Boolean expression type
