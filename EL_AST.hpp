@@ -47,3 +47,13 @@ struct num_expr {
 struct bool_expr {
 
 };
+
+//N-Height
+int nheight(const num_expr& ne) {
+
+}
+
+//B-Height
+int bheight(const bool_expr& be) {
+
+}
