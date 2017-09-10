@@ -103,26 +103,38 @@ enum bool_expr_type {
 //Boolean expression
 struct bool_expr {
 	bool_expr_type type;
+
+	bool_expr(bool_expr_type t)
+		: type(t) {}
 };
 
 //Bool boolean expression...
 //terrible naming convention :(
 struct boolean_expr : bool_expr {
 	bool val;
+
+	boolean_expr(bool v)
+		: bool_expr(boolean), val(v) {}
 };
 
 //Relational boolean expression
 struct relation_expr : bool_expr {
 	rel_op op;
-	num_expr first;
-	num_expr second;
+	num_expr* first;
+	num_expr* second;
+
+	relation_expr(rel_op o, num_expr* f, num_expr* s)
+		: bool_expr(relational), op(o), first(f), second(s) {}
 };
 
 //Logic boolean expression
 struct logic_expr : bool_expr {
 	logic_op op;
-	bool_expr first;
-	bool_expr second;
+	bool_expr* first;
+	bool_expr* second;
+
+	logic_expr(logic_op o, bool_expr* f, bool_expr* s)
+		: bool_expr(logic), op(o), first(f), second(s) {}
 };
 
 //N-Height
