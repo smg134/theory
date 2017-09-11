@@ -146,6 +146,9 @@ struct relation_expr : bool_expr {
 
 	relation_expr(rel_op o, num_expr* f, num_expr* s)
 		: bool_expr(relational), op(o), first(f), second(s) {}
+
+	virtual num_expr* getFirstNum() { return first; }
+	virtual num_expr* getSecondNum() { return second; }
 };
 
 //Logic boolean expression
@@ -156,6 +159,9 @@ struct logic_expr : bool_expr {
 
 	logic_expr(logic_op o, bool_expr* f, bool_expr* s)
 		: bool_expr(logic), op(o), first(f), second(s) {}
+
+	virtual bool_expr* getFirstBool() { return first; }
+	virtual bool_expr* getSecondBool() { return second; }
 };
 
 //N-Height
