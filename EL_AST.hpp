@@ -7,6 +7,14 @@ struct bool_expr;
 int max(int, int);
 int bheight(bool_expr*);
 
+struct IntPair {
+	int x;
+	int y;
+
+	IntPair(int a, int b)
+		: x(a), y(b) {}
+};
+
 //Integer literal
 //int
 
@@ -174,6 +182,54 @@ int bheight(bool_expr* be) {
 			bheight(static_cast<logic_expr*>(be)->second));
 		break;
 	}
+}
+
+//Min-Max Arguments
+//Numeric expression
+IntPair minMaxArgs(num_expr* ne) {
+	switch (ne->type) {
+	case num_expr_type::integer:
+		return IntPair(0, 0);
+		break;
+	case num_expr_type::argument:
+		return IntPair(static_cast<arg_expr*>(ne)->args, static_cast<arg_expr*>(ne)->args);
+		break;
+	case num_expr_type::arithmetic:
+		IntPair first = minMaxArgs(static_cast<arith_expr*>(ne)->first);
+		IntPair second = minMaxArgs(static_cast<arith_expr*>(ne)->second);
+		return IntPair(min(first.x, second.x), max(first.y, second.y));
+		break;
+	case num_expr_type::conditional:
+		IntPair first = minMaxArgs(static_cast<cond_expr*>(ne)->pass);
+		IntPair second = minMaxArgs(static_cast<cond_expr*>(ne)->fail);
+		IntPair boolean = minMaxArgs(static_cast<cond_expr*>(ne)->test);
+		return IntPair(min(boolean.x, min(first.x, second.x)), max(boolean.y, max(first.y, second.y)));
+		break;
+	}
+}
+
+//Bool expression
+IntPair minMaxArgs(bool_expr* be) {
+	switch (be->type) {
+	case bool_expr_type::boolean:
+		return IntPair(0, 0);
+		break;
+	case bool_expr_type::relational:
+		IntPair first = minMaxArgs(static_cast<relation_expr*>(be)->first);
+		IntPair second = minMaxArgs(static_cast<relation_expr*>(be)->second);
+		return IntPair(min(first.x, second.x), max(first.y, second.y));
+		break;
+	case bool_expr_type::logic:
+		IntPair first = minMaxArgs(static_cast<logic_expr*>(be)->first);
+		IntPair second = minMaxArgs(static_cast<logic_expr*>(be)->second);
+		return IntPair(min(first.x, second.x), max(first.y, second.y));
+		break;
+	}
+}
+
+int min(int a, int b) {
+	if (a < b) return a;
+	else return b;
 }
 
 int max(int a, int b) {
