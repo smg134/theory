@@ -3,6 +3,10 @@
 struct Program;
 struct num_expr;
 struct bool_expr;
+enum bool_expr_type;
+
+int max(int, int);
+int bheight(bool_expr*);
 
 //Integer literal
 //int
@@ -15,7 +19,7 @@ enum arith_op {
 	add,
 	sub,
 	mul,
-	div,
+	divide,
 	mod,
 };
 
@@ -55,6 +59,10 @@ struct num_expr {
 
 	num_expr(num_expr_type t)
 		: type(t) {}
+
+	virtual num_expr* getFirst() { return this; }
+	virtual num_expr* getSecond() { return this; }
+	virtual bool_expr* getBoolExpr();
 };
 
 //Integer numeric expression
@@ -81,6 +89,9 @@ struct arith_expr : num_expr {
 
 	arith_expr(arith_op o, num_expr* f, num_expr* s)
 		: num_expr(arithmetic), op(o), first(f), second(s) {}
+
+	virtual num_expr* getFirst() { return first; }
+	virtual num_expr* getSecond() { return second; }
 };
 
 //Conditional numeric expression
@@ -91,6 +102,10 @@ struct cond_expr : num_expr {
 
 	cond_expr(bool_expr* t, num_expr* p, num_expr* f)
 		: num_expr(conditional), test(t), pass(p), fail(f) {}
+
+	virtual num_expr* getFirst() { return pass; }
+	virtual num_expr* getSecond() { return fail; }
+	virtual bool_expr* getBoolExpr() { return test; }
 };
 
 //Boolean expression type
@@ -106,6 +121,12 @@ struct bool_expr {
 
 	bool_expr(bool_expr_type t)
 		: type(t) {}
+
+	virtual num_expr* getFirstNum() { return &num_expr(num_expr_type::integer); }
+	virtual num_expr* getSecondNum() { return &num_expr(num_expr_type::integer); }
+
+	virtual bool_expr* getFirstBool() { return this; }
+	virtual bool_expr* getSecondBool() { return this; }
 };
 
 //Bool boolean expression...
@@ -138,33 +159,43 @@ struct logic_expr : bool_expr {
 };
 
 //N-Height
-int nheight(const num_expr* ne) {
+int nheight(num_expr* ne) {
 	switch (ne->type) {
 	case num_expr_type::integer:
 		return 0;
+		break;
 	case num_expr_type::argument:
 		return 1;
+		break;
 	case num_expr_type::arithmetic:
-		return 1 + max(nheight(ne->first), nheight(ne->second));
+		return 1 + max(nheight(ne->getFirst()), nheight(ne->getSecond()));
+		break;
 	case num_expr_type::conditional:
-		return 1 + max(bheight(ne->test), max(nheight(ne->first), nheight(ne->second)));
+		return 1 + max(bheight(ne->getBoolExpr()), max(nheight(ne->getFirst()), nheight(ne->getSecond())));
+		break;
 	}
 }
 
-
 //B-Height
-int bheight(const bool_expr* be) {
+int bheight(bool_expr* be) {
 	switch (be->type) {
 	case bool_expr_type::boolean:
 		return 0;
+		break;
 	case bool_expr_type::relational:
-		return 1 + max(nheight(be->first), nheight(be->second));
+		return 1 + max(nheight(be->getFirstNum()), nheight(be->getSecondNum()));
+		break;
 	case bool_expr_type::logic:
-		return 1 + max(bheight(be->first), bheight(be->second));
+		return 1 + max(bheight(be->getFirstBool()), bheight(be->getSecondBool()));
+		break;
 	}
 }
 
 int max(int a, int b) {
 	if (a > b) return a;
 	else return b;
+}
+
+bool_expr* num_expr::getBoolExpr() {
+	return &bool_expr(bool_expr_type::boolean);
 }
