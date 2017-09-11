@@ -4,6 +4,7 @@ struct Program;
 struct num_expr;
 struct bool_expr;
 
+int min(int, int);
 int max(int, int);
 int bheight(bool_expr*);
 
@@ -11,8 +12,14 @@ struct IntPair {
 	int x;
 	int y;
 
+	IntPair() {}
 	IntPair(int a, int b)
 		: x(a), y(b) {}
+
+	bool operator==(IntPair a) {
+		if (this->x == a.x && this->y == a.y) return true;
+		return false;
+	}
 };
 
 //Integer literal
@@ -184,9 +191,11 @@ int bheight(bool_expr* be) {
 	}
 }
 
+IntPair minMaxArgs(bool_expr*);
 //Min-Max Arguments
 //Numeric expression
 IntPair minMaxArgs(num_expr* ne) {
+	IntPair first, second, boolean;
 	switch (ne->type) {
 	case num_expr_type::integer:
 		return IntPair(0, 0);
@@ -195,14 +204,14 @@ IntPair minMaxArgs(num_expr* ne) {
 		return IntPair(static_cast<arg_expr*>(ne)->args, static_cast<arg_expr*>(ne)->args);
 		break;
 	case num_expr_type::arithmetic:
-		IntPair first = minMaxArgs(static_cast<arith_expr*>(ne)->first);
-		IntPair second = minMaxArgs(static_cast<arith_expr*>(ne)->second);
+		first = minMaxArgs(static_cast<arith_expr*>(ne)->first);
+		second = minMaxArgs(static_cast<arith_expr*>(ne)->second);
 		return IntPair(min(first.x, second.x), max(first.y, second.y));
 		break;
 	case num_expr_type::conditional:
-		IntPair first = minMaxArgs(static_cast<cond_expr*>(ne)->pass);
-		IntPair second = minMaxArgs(static_cast<cond_expr*>(ne)->fail);
-		IntPair boolean = minMaxArgs(static_cast<cond_expr*>(ne)->test);
+		first = minMaxArgs(static_cast<cond_expr*>(ne)->pass);
+		second = minMaxArgs(static_cast<cond_expr*>(ne)->fail);
+		boolean = minMaxArgs(static_cast<cond_expr*>(ne)->test);
 		return IntPair(min(boolean.x, min(first.x, second.x)), max(boolean.y, max(first.y, second.y)));
 		break;
 	}
@@ -210,18 +219,19 @@ IntPair minMaxArgs(num_expr* ne) {
 
 //Bool expression
 IntPair minMaxArgs(bool_expr* be) {
+	IntPair first, second;
 	switch (be->type) {
 	case bool_expr_type::boolean:
 		return IntPair(0, 0);
 		break;
 	case bool_expr_type::relational:
-		IntPair first = minMaxArgs(static_cast<relation_expr*>(be)->first);
-		IntPair second = minMaxArgs(static_cast<relation_expr*>(be)->second);
+		first = minMaxArgs(static_cast<relation_expr*>(be)->first);
+		second = minMaxArgs(static_cast<relation_expr*>(be)->second);
 		return IntPair(min(first.x, second.x), max(first.y, second.y));
 		break;
 	case bool_expr_type::logic:
-		IntPair first = minMaxArgs(static_cast<logic_expr*>(be)->first);
-		IntPair second = minMaxArgs(static_cast<logic_expr*>(be)->second);
+		first = minMaxArgs(static_cast<logic_expr*>(be)->first);
+		second = minMaxArgs(static_cast<logic_expr*>(be)->second);
 		return IntPair(min(first.x, second.x), max(first.y, second.y));
 		break;
 	}
