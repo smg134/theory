@@ -1,13 +1,18 @@
 #pragma once
 
+//Object Prototypes
+struct IntPair;
 struct Program;
 struct num_expr;
 struct bool_expr;
 
+//Function Prototypes
 int min(int, int);
 int max(int, int);
 int bheight(bool_expr*);
+IntPair minMaxArgs(bool_expr*);
 
+//Return type of minMaxArgs()
 struct IntPair {
 	int x;
 	int y;
@@ -191,7 +196,6 @@ int bheight(bool_expr* be) {
 	}
 }
 
-IntPair minMaxArgs(bool_expr*);
 //Min-Max Arguments
 //Numeric expression
 IntPair minMaxArgs(num_expr* ne) {
