@@ -241,6 +241,68 @@ IntPair minMaxArgs(bool_expr* be) {
 	}
 }
 
+//Program folding
+Program* pFold(Program* p) {
+	p->body = nFold(p->body);
+}
+
+//Numeric expression folding
+num_expr* nFold(num_expr* n) {
+	switch (n->type) {
+	case (num_expr_type::integer):
+		return n;
+		break;
+	case (num_expr_type::argument):
+		//nothing yet?
+		break;
+	case (num_expr_type::arithmetic):
+		*n = arithFold(static_cast<arith_expr*>(n));
+		return n;
+		break;
+	case (num_expr_type::conditional):
+		//nothing yet?
+		//put bFold here
+		break;
+	}
+}
+
+//Arithmetic expression folding
+num_expr arithFold(arith_expr* n) {
+	//if both operands are integer literals
+	if (n->first->type == num_expr_type::integer && n->second->type == num_expr_type::integer) {
+		num_expr* first = n->first;
+		num_expr* second = n->second;
+		switch (n->op) {
+		case (arith_op::add):
+			return int_expr(static_cast<int_expr*>(first)->val + static_cast<int_expr*>(second)->val);
+			break;
+		case (arith_op::sub):
+			return int_expr(static_cast<int_expr*>(first)->val - static_cast<int_expr*>(second)->val);
+			break;
+		case (arith_op::mul):
+			return int_expr(static_cast<int_expr*>(first)->val * static_cast<int_expr*>(second)->val);
+			break;
+		case (arith_op::divide):
+			return int_expr(static_cast<int_expr*>(first)->val / static_cast<int_expr*>(second)->val);
+			break;
+		case (arith_op::mod):
+			return int_expr(static_cast<int_expr*>(first)->val % static_cast<int_expr*>(second)->val);
+			break;
+		}
+	}
+	//if one of the two operands is not an integer literal
+	else {
+		n->first = nFold(n->first);
+		n->second = nFold(n->second);
+		return arithFold(n);
+	}
+}
+
+//Boolean expression folding
+bool_expr bFold(bool_expr* b) {
+	//work on this
+}
+
 int min(int a, int b) {
 	if (a < b) return a;
 	else return b;
