@@ -87,24 +87,6 @@ struct num_expr {
 
 	num_expr(num_expr_type t)
 		: type(t) {}
-
-	bool operator==(num_expr* n) {
-		if (this->type != n->type) return false;
-		switch (this->type) {
-		case (num_expr_type::integer):
-			return *static_cast<int_expr*>(this) == static_cast<int_expr*>(n);
-			break;
-		case (num_expr_type::argument):
-			return *static_cast<arg_expr*>(this) == static_cast<arg_expr*>(n);
-			break;
-		case (num_expr_type::arithmetic):
-			return *static_cast<arith_expr*>(this) == static_cast<arith_expr*>(n);
-			break;
-		case (num_expr_type::conditional):
-			return *static_cast<cond_expr*>(this) == static_cast<cond_expr*>(n);
-			break;
-		}
-	}
 };
 
 //Integer numeric expression
@@ -113,11 +95,6 @@ struct int_expr : num_expr {
 
 	int_expr(int v)
 		: num_expr(integer), val(v) {}
-
-	bool operator==(int_expr* n) {
-		if (this->val == n->val) return true;
-		else return false;
-	}
 };
 
 //Argument numeric expression
@@ -126,11 +103,6 @@ struct arg_expr : num_expr {
 
 	arg_expr(int a)
 		: num_expr(argument), args(a) {}
-
-	bool operator==(arg_expr* n) {
-		if (this->args == n->args) return true;
-		else return false;
-	}
 };
 
 //Arithmetic numeric expression
@@ -141,13 +113,6 @@ struct arith_expr : num_expr {
 
 	arith_expr(arith_op o, num_expr* f, num_expr* s)
 		: num_expr(arithmetic), op(o), first(f), second(s) {}
-
-	bool operator==(arith_expr* n) {
-		if (this->first == n->first
-			&& this->second == n->second
-			&& this->op == n->op) return true;
-		else return false;
-	}
 };
 
 //Conditional numeric expression
@@ -158,13 +123,6 @@ struct cond_expr : num_expr {
 
 	cond_expr(bool_expr* t, num_expr* p, num_expr* f)
 		: num_expr(conditional), test(t), pass(p), fail(f) {}
-
-	bool operator==(cond_expr* n) {
-		if (this->test == n->test
-			&& this->pass == n->pass
-			&& this->fail == n->fail) return true;
-		else return false;
-	}
 };
 
 //Boolean expression type
@@ -180,21 +138,6 @@ struct bool_expr {
 
 	bool_expr(bool_expr_type t)
 		: type(t) {}
-
-	bool operator==(bool_expr* b) {
-		if (this->type != b->type) return false;
-		switch (this->type) {
-		case (bool_expr_type::boolean):
-			return *static_cast<boolean_expr*>(this) == static_cast<boolean_expr*>(b);
-			break;
-		case (bool_expr_type::relational):
-			return *static_cast<relation_expr*>(this) == static_cast<relation_expr*>(b);
-			break;
-		case (bool_expr_type::logic):
-			return *static_cast<logic_expr*>(this) == static_cast<logic_expr*>(b);
-			break;
-		}
-	}
 };
 
 //Bool boolean expression...
@@ -204,11 +147,6 @@ struct boolean_expr : bool_expr {
 
 	boolean_expr(bool v)
 		: bool_expr(boolean), val(v) {}
-
-	bool operator==(boolean_expr* b) {
-		if (this->val == b->val) return true;
-		else return false;
-	}
 };
 
 //Relational boolean expression
@@ -219,13 +157,6 @@ struct relation_expr : bool_expr {
 
 	relation_expr(rel_op o, num_expr* f, num_expr* s)
 		: bool_expr(relational), op(o), first(f), second(s) {}
-
-	bool operator==(relation_expr* b) {
-		if (this->first == b->first
-			&& this->second == b->second
-			&& this->op == b->op) return true;
-		else return false;
-	}
 };
 
 //Logic boolean expression
@@ -236,13 +167,6 @@ struct logic_expr : bool_expr {
 
 	logic_expr(logic_op o, bool_expr* f, bool_expr* s)
 		: bool_expr(logic), op(o), first(f), second(s) {}
-
-	bool operator==(logic_expr* b) {
-		if (this->first == b->first
-			&& this->second == b->second
-			&& this->op == b->op) return true;
-		else return false;
-	}
 };
 
 //N-Height
@@ -389,48 +313,11 @@ bool_expr* bFold(bool_expr* b) {
 	//work on this
 }
 
-
 //Numeric expression equality
-bool neq(num_expr* n1, num_expr* n2) {
-	return n1 == n2;
-}
+bool neq(num_expr* n1, num_expr* n2) {}
 
 //Boolean expression equality
-bool beq(bool_expr* b1, bool_expr* b2) {
-	return b1 == b2;
-}
-
-//Program identities
-Program pOpt(Program* p) {
-	p->body = nOpt(p->body);
-	return *p;
-}
-
-//Numeric identities
-num_expr* nOpt(num_expr* n) {
-	if (n->type != num_expr_type::arithmetic) return n;
-	*n = arithOpt(static_cast<arith_expr*>(n));
-}
-
-num_expr arithOpt(arith_expr* n) {
-	switch (n->op) {
-	case (arith_op::add):
-		break;
-	case (arith_op::sub):
-		break;
-	case (arith_op::mul):
-		break;
-	case (arith_op::divide):
-		break;
-	case(arith_op::mod):
-		break;
-	}
-}
-
-//Boolean identities
-bool_expr* bOpt(bool_expr* b) {
-
-}
+bool beq(bool_expr* b1, bool_expr* b2) {}
 
 //Minimum
 int min(int a, int b) {
