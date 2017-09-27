@@ -314,10 +314,60 @@ bool_expr* bFold(bool_expr* b) {
 }
 
 //Numeric expression equality
-bool neq(num_expr* n1, num_expr* n2) {}
+bool neq(num_expr* n1, num_expr* n2) {
+	if (n1->type != n2->type) return false;
+	switch (n1->type) {
+	case (num_expr_type::integer):
+		int_expr* int1 = static_cast<int_expr*>(n1);
+		int_expr* int2 = static_cast<int_expr*>(n2);
+		return int1->val == int2->val;
+		break;
+	case (num_expr_type::argument):
+		arg_expr* arg1 = static_cast<arg_expr*>(n1);
+		arg_expr* arg2 = static_cast<arg_expr*>(n2);
+		return arg1->args == arg2->args;
+		break;
+	case (num_expr_type::arithmetic):
+		arith_expr* arith1 = static_cast<arith_expr*>(n1);
+		arith_expr* arith2 = static_cast<arith_expr*>(n2);
+		if (arith1->op != arith2->op) return false;
+		if (neq(arith1->first, arith2->first) && neq(arith1->second, arith2->second)) return true;
+		else return false;
+		break;
+	case (num_expr_type::conditional):
+		cond_expr* cond1 = static_cast<cond_expr*>(n1);
+		cond_expr* cond2 = static_cast<cond_expr*>(n2);
+		if (!beq(cond1->test, cond2->test)) return false;
+		return neq(cond1->pass, cond2->pass) && neq(cond1->fail, cond2->fail);
+		break;
+	}
+}
 
 //Boolean expression equality
-bool beq(bool_expr* b1, bool_expr* b2) {}
+bool beq(bool_expr* b1, bool_expr* b2) {
+	if (b1->type != b2->type) return false;
+	switch (b1->type) {
+	case (bool_expr_type::boolean):
+		boolean_expr* bool1 = static_cast<boolean_expr*>(b1);
+		boolean_expr* bool2 = static_cast<boolean_expr*>(b2);
+		return bool1->val = bool2->val;
+		break;
+	case (bool_expr_type::relational):
+		relation_expr* rel1 = static_cast<relation_expr*>(b1);
+		relation_expr* rel2 = static_cast<relation_expr*>(b2);
+		if (rel1->op != rel2->op) return false;
+		if (neq(rel1->first, rel2->first) && neq(rel1->second, rel2->second)) return true;
+		else return false;
+		break;
+	case (bool_expr_type::logic):
+		logic_expr* log1 = static_cast<logic_expr*>(b1);
+		logic_expr* log2 = static_cast<logic_expr*>(b2);
+		if (log1->op != log2->op) return false;
+		if (beq(log1->first, log2->first) && beq(log1->second, log2->second)) return true;
+		else return false;
+		break;
+	}
+}
 
 //Minimum
 int min(int a, int b) {
