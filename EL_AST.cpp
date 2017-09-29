@@ -2,7 +2,7 @@
 #include "stdafx.h"
 #include "EL_AST.hpp"
 
-//IntPair == Overload
+//IntPair '==' Overload
 bool IntPair::operator==(IntPair a) {
 	if (this->x == a.x && this->y == a.y) return true;
 	return false;
@@ -11,36 +11,36 @@ bool IntPair::operator==(IntPair a) {
 //N-Height
 int nheight(num_expr* ne) {
 	switch (ne->type) {
-	case num_expr_type::integer:
+	case num_expr_type::integer: {
 		return 0;
-		break;
-	case num_expr_type::argument:
+	}
+	case num_expr_type::argument: {
 		return 1;
-		break;
-	case num_expr_type::arithmetic:
+	}
+	case num_expr_type::arithmetic: {
 		return 1 + max(nheight(static_cast<arith_expr*>(ne)->first), nheight(static_cast<arith_expr*>(ne)->second));
-		break;
-	case num_expr_type::conditional:
+	}
+	case num_expr_type::conditional: {
 		return 1 + max(bheight(static_cast<cond_expr*>(ne)->test),
 			max(nheight(static_cast<cond_expr*>(ne)->pass), nheight(static_cast<cond_expr*>(ne)->fail)));
-		break;
+	}
 	}
 }
 
 //B-Height
 int bheight(bool_expr* be) {
 	switch (be->type) {
-	case bool_expr_type::boolean:
+	case bool_expr_type::boolean: {
 		return 0;
-		break;
-	case bool_expr_type::relational:
+	}
+	case bool_expr_type::relational: {
 		return 1 + max(nheight(static_cast<relation_expr*>(be)->first),
 			nheight(static_cast<relation_expr*>(be)->second));
-		break;
-	case bool_expr_type::logic:
+	}
+	case bool_expr_type::logic: {
 		return 1 + max(bheight(static_cast<logic_expr*>(be)->first),
 			bheight(static_cast<logic_expr*>(be)->second));
-		break;
+	}
 	}
 }
 
@@ -49,23 +49,23 @@ int bheight(bool_expr* be) {
 IntPair minMaxArgs(num_expr* ne) {
 	IntPair first, second, boolean;
 	switch (ne->type) {
-	case num_expr_type::integer:
+	case num_expr_type::integer: {
 		return IntPair(0, 0);
-		break;
-	case num_expr_type::argument:
+	}
+	case num_expr_type::argument: {
 		return IntPair(static_cast<arg_expr*>(ne)->args, static_cast<arg_expr*>(ne)->args);
-		break;
-	case num_expr_type::arithmetic:
+	}
+	case num_expr_type::arithmetic: {
 		first = minMaxArgs(static_cast<arith_expr*>(ne)->first);
 		second = minMaxArgs(static_cast<arith_expr*>(ne)->second);
 		return IntPair(min(first.x, second.x), max(first.y, second.y));
-		break;
-	case num_expr_type::conditional:
+	}
+	case num_expr_type::conditional: {
 		first = minMaxArgs(static_cast<cond_expr*>(ne)->pass);
 		second = minMaxArgs(static_cast<cond_expr*>(ne)->fail);
 		boolean = minMaxArgs(static_cast<cond_expr*>(ne)->test);
 		return IntPair(min(boolean.x, min(first.x, second.x)), max(boolean.y, max(first.y, second.y)));
-		break;
+	}
 	}
 }
 
@@ -73,19 +73,19 @@ IntPair minMaxArgs(num_expr* ne) {
 IntPair minMaxArgs(bool_expr* be) {
 	IntPair first, second;
 	switch (be->type) {
-	case bool_expr_type::boolean:
+	case bool_expr_type::boolean: {
 		return IntPair(0, 0);
-		break;
-	case bool_expr_type::relational:
+	}
+	case bool_expr_type::relational: {
 		first = minMaxArgs(static_cast<relation_expr*>(be)->first);
 		second = minMaxArgs(static_cast<relation_expr*>(be)->second);
 		return IntPair(min(first.x, second.x), max(first.y, second.y));
-		break;
-	case bool_expr_type::logic:
+	}
+	case bool_expr_type::logic: {
 		first = minMaxArgs(static_cast<logic_expr*>(be)->first);
 		second = minMaxArgs(static_cast<logic_expr*>(be)->second);
 		return IntPair(min(first.x, second.x), max(first.y, second.y));
-		break;
+	}
 	}
 }
 
@@ -98,20 +98,23 @@ Program* pFold(Program* p) {
 //Numeric expression folding
 num_expr* nFold(num_expr* n) {
 	switch (n->type) {
-	case (num_expr_type::integer):
+	case num_expr_type::integer: {
 		return n;
-		break;
-	case (num_expr_type::argument):
-		//nothing yet?
-		break;
-	case (num_expr_type::arithmetic):
+	}
+	case num_expr_type::argument: {
+		return n;
+	}
+	case num_expr_type::arithmetic: {
 		*n = arithFold(static_cast<arith_expr*>(n));
 		return n;
-		break;
-	case (num_expr_type::conditional):
-		//nothing yet?
-		//put bFold here
-		break;
+	}
+	case num_expr_type::conditional: {
+		cond_expr* a = static_cast<cond_expr*>(n);
+		a->test = bFold(a->test);
+		a->pass = nFold(a->pass);
+		a->fail = nFold(a->fail);
+		return a;
+	}
 	}
 }
 
@@ -122,21 +125,21 @@ num_expr arithFold(arith_expr* n) {
 		num_expr* first = n->first;
 		num_expr* second = n->second;
 		switch (n->op) {
-		case (arith_op::add):
+		case arith_op::add: {
 			return int_expr(static_cast<int_expr*>(first)->val + static_cast<int_expr*>(second)->val);
-			break;
-		case (arith_op::sub):
+		}
+		case arith_op::sub: {
 			return int_expr(static_cast<int_expr*>(first)->val - static_cast<int_expr*>(second)->val);
-			break;
-		case (arith_op::mul):
+		}
+		case arith_op::mul: {
 			return int_expr(static_cast<int_expr*>(first)->val * static_cast<int_expr*>(second)->val);
-			break;
-		case (arith_op::divide):
+		}
+		case arith_op::divide: {
 			return int_expr(static_cast<int_expr*>(first)->val / static_cast<int_expr*>(second)->val);
-			break;
-		case (arith_op::mod):
+		}
+		case arith_op::mod: {
 			return int_expr(static_cast<int_expr*>(first)->val % static_cast<int_expr*>(second)->val);
-			break;
+		}
 		}
 	}
 	//if one of the two operands is not an integer literal
@@ -149,7 +152,21 @@ num_expr arithFold(arith_expr* n) {
 
 //Boolean expression folding
 bool_expr* bFold(bool_expr* b) {
-	//work on this
+	switch (b->type) {
+	case bool_expr_type::boolean: {
+		return b;
+	}
+	case bool_expr_type::relational: {
+		relation_expr* a = static_cast<relation_expr*>(b);
+		a->first = nFold(a->first);
+		a->second = nFold(a->second);
+	}
+	case bool_expr_type::logic: {
+		logic_expr* a = static_cast<logic_expr*>(b);
+		a->first = bFold(a->first);
+		a->second = bFold(a->second);
+	}
+	}
 	return b;
 }
 
