@@ -226,6 +226,89 @@ bool beq(bool_expr* b1, bool_expr* b2) {
 	}
 }
 
+//Program identities
+Program* pOpt(Program* p) {
+	p->body = nOpt(p->body);
+	return p;
+}
+
+//Numeric identities
+num_expr* nOpt(num_expr* n) {
+	switch (n->type) {
+	case num_expr_type::integer: {
+		return n;
+	}
+	case num_expr_type::argument: {
+		return n;
+	}
+	case num_expr_type::arithmetic: {
+		*n = arithOpt(static_cast<arith_expr*>(n));
+	}
+	case num_expr_type::conditional: {
+		cond_expr* a = static_cast<cond_expr*>(n);
+		a->test = bOpt(a->test);
+		a->pass = nOpt(a->pass);
+		a->fail = nOpt(a->fail);
+	}
+	}
+}
+
+//Arithmetic identities
+num_expr arithOpt(arith_expr* n) {
+	switch (n->op) {
+	case arith_op::add: {
+		//n + 0 = n AND 0 + n = n
+		if (neq(n->first, new int_expr(0))) return *n->second;
+		if (neq(n->second,new int_expr(0))) return *n->first;
+	}
+	case arith_op::sub: {
+		//n - n = 0
+		if (neq(n->first, n->second)) return int_expr(0);
+	}
+	case arith_op::mul: {
+		//n * 0 = 0 AND 0 * n = 0
+		if (neq(n->first, new int_expr(0))) return int_expr(0);
+		if (neq(n->second, new int_expr(0))) return int_expr(0);
+		//n * 1 = n AND 1 * n = n
+		if (neq(n->first, new int_expr(1))) return *n->second;
+		if (neq(n->second, new int_expr(1))) return *n->first;
+	}
+	case arith_op::divide: {
+		//n / 1 = n
+		if (neq(n->second, new int_expr(1))) return *n->first;
+		//n / n = 1
+		if (neq(n->first, n->second)) return int_expr(1);
+	}
+	case arith_op::mod: {
+		//n mod 1 = 0
+		if (neq(n->second, new int_expr(1))) return int_expr(0);
+		//n mod n = 0
+		if (neq(n->first, n->second)) return int_expr(0);
+	}
+	}
+	n->first = nOpt(n->first);
+	n->second = nOpt(n->second);
+}
+
+//Boolean identities
+bool_expr* bOpt(bool_expr* b) {
+	switch (b->type) {
+	case bool_expr_type::boolean: {
+		return b;
+	}
+	case bool_expr_type::relational: {
+		relation_expr* a = static_cast<relation_expr*>(b);
+		a->first = nOpt(a->first);
+		a->second = nOpt(a->second);
+	}
+	case bool_expr_type::logic: {
+		logic_expr* a = static_cast<logic_expr*>(b);
+		a->first = bOpt(a->first);
+		a->second = bOpt(a->second);
+	}
+	}
+}
+
 //Minimum
 int min(int a, int b) {
 	if (a < b) return a;

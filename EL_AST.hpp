@@ -180,6 +180,18 @@ bool neq(num_expr*, num_expr*);
 //Boolean expression equality
 bool beq(bool_expr* , bool_expr*);
 
+//Program identities
+Program* pOpt(Program*);
+
+//Numeric identities
+num_expr* nOpt(num_expr*);
+
+//Arithmetic identities
+num_expr arithOpt(arith_expr*);
+
+//Boolean identities
+bool_expr* bOpt(bool_expr*);
+
 //Minimum
 int min(int, int);
 
